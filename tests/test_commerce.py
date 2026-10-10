@@ -35,3 +35,15 @@ def test_negative_days_are_rejected():
         assert False
     except ValueError:
         pass
+
+
+def test_delivery_at_free_shipping_boundary():
+    assert calculate_delivery_fee(100) == 0.0
+
+
+def test_delivery_above_free_shipping_boundary():
+    assert calculate_delivery_fee(100.01) == 0.0
+
+
+def test_vip_discount_at_threshold():
+    assert calculate_discount(50, "VIP10") == 5.0

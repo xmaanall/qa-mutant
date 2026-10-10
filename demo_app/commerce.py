@@ -8,7 +8,7 @@ def calculate_delivery_fee(subtotal: float) -> float:
     return 10.0
 
 
-def calculate_discount(subtotal: float, coupon: str | None) -> float:
+def calculate_discount(subtotal: float, coupon) -> float:
     """VIP10 gives 10% off orders of at least $50, capped at $30."""
     if coupon == "VIP10" and subtotal >= 50:
         return min(subtotal * 0.10, 30.0)
