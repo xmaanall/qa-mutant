@@ -1,91 +1,152 @@
-# QA-MUTANT 🧬
+# QA-MUTANT --- AI-Powered Adversarial Testing Framework
 
-**An AI-powered adversarial testing framework for measuring and improving test-suite strength.**
+An AI-assisted mutation testing framework designed to identify test
+coverage gaps, analyze surviving mutations, and guide the creation of
+stronger software tests.
 
-QA-MUTANT flips the usual AI-testing idea. Instead of asking AI to simply generate more test cases, it creates targeted mutations of application behavior, runs an existing test suite against those mutations, identifies surviving mutations, and uses AI-assisted analysis to propose targeted tests.
+## Project Goal
 
-> **The goal is not to generate more tests. The goal is to build stronger tests that can detect more defects.**
+QA-MUTANT simulates adversarial changes to application logic and
+measures whether the existing test suite can detect them.
 
-## What it does
+The framework analyzes surviving mutations and generates focused testing
+recommendations to improve test coverage.
 
-1. Runs a baseline pytest suite against a small fictional e-commerce application.
-2. Creates controlled mutations of business logic.
-3. Executes the test suite against each mutant.
-4. Classifies mutants as **killed**, **survived**, or **invalid**.
-5. Calculates a mutation score.
-6. Analyzes surviving mutants and suggests targeted tests.
-7. Provides a Streamlit dashboard for the experiment.
+## How It Works
 
-## Demo domain
+``` text
+Application Code
+       ↓
+Mutation Engine
+       ↓
+Generate Mutants
+       ↓
+Run Test Suite
+       ↓
+Killed / Survived
+       ↓
+AI Analysis
+       ↓
+Testing Recommendations
+       ↓
+Add Stronger Tests
+       ↓
+Re-run Mutation Testing
+```
 
-The project uses a fictional e-commerce application called **ShopSphere**. It has no connection to any real company, production system, government platform, or private data.
+## Project Structure
 
-## Project structure
-
-```text
+``` text
 qa-mutant/
-├── app/                    # Streamlit dashboard
-├── engine/                 # Mutation and scoring engine
-├── ai/                     # AI-assisted analysis layer
-├── demo_app/               # Fictional application under test
-├── tests/                  # Baseline test suite
-├── experiments/            # Reproducible experiment outputs
-├── docs/                   # Architecture and methodology
-├── .github/workflows/      # CI
-├── requirements.txt
+├── demo_app/
+│   └── commerce.py
+├── tests/
+│   └── test_commerce.py
+├── engine/
+│   ├── mutations.py
+│   ├── runner.py
+│   ├── scoring.py
+│   └── run_experiment.py
+├── ai/
+│   └── analyzer.py
+├── experiments/
+│   ├── baseline_results.json
+│   ├── improved_results.json
+│   └── ai_analysis.json
 └── README.md
 ```
 
-## Run locally
+## Mutation Testing
 
-```bash
-python -m venv .venv
-source .venv/bin/activate       # Windows: .venv\Scripts\activate
+The project introduces controlled changes to application logic,
+including boundary conditions, thresholds, branch behavior, discount
+rules, and other business rules.
+
+-   **Killed** → at least one test detects the changed behavior.
+-   **Survived** → the current test suite does not detect the changed
+    behavior.
+
+## Results
+
+### Baseline
+
+  Metric                  Result
+  ----------------- ------------
+  Total Mutations             12
+  Killed                       8
+  Survived                     4
+  Mutation Score      **66.67%**
+
+### AI Analysis
+
+The AI analysis layer reviews surviving mutations and generates focused
+testing recommendations, such as boundary tests, exact monetary
+assertions, and focused branch assertions.
+
+The analyzer supports a deterministic local fallback and optional OpenAI
+Responses API integration.
+
+### Improved Test Suite
+
+After adding targeted tests based on the identified gaps:
+
+  Metric                Result
+  ----------------- ----------
+  Total Mutations           12
+  Killed                    12
+  Survived                   0
+  Mutation Score      **100%**
+
+## Running the Project
+
+``` bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 pytest -q
 python -m engine.run_experiment
-streamlit run app/dashboard.py
 ```
 
-The live LLM analysis is optional. Without an API key, QA-MUTANT uses a deterministic local analysis fallback so the core experiment remains reproducible. To enable live OpenAI analysis, set `OPENAI_API_KEY` and optionally `OPENAI_MODEL` in your environment. API usage may incur charges. The current mutation operators are deterministic; the LLM analyzes surviving mutations and proposes focused tests.
+Run AI analysis against the baseline:
 
-To enable an LLM provider, copy `.env.example` to `.env` and configure the provider supported by your environment.
-
-## Metrics
-
-**Mutation Score**
-
-```text
-Killed valid mutants / Total valid mutants × 100
+``` bash
+python -c 'import json; from ai.analyzer import analyze_results; data=json.load(open("experiments/baseline_results.json")); findings=analyze_results(data["mutations"], use_llm=False); json.dump(findings, open("experiments/ai_analysis.json","w"), indent=2); print(json.dumps(findings, indent=2))'
 ```
 
-The dashboard also reports surviving mutants and AI recommendations. AI suggestions are treated as proposals and are never considered valid merely because the model generated them.
+## Why Mutation Testing?
 
-## Important methodology
+Traditional code coverage can show that a line was executed without
+proving that the test actually validates the expected behavior.
 
-QA-MUTANT separates **execution evidence** from **AI interpretation**. The test runner determines whether a mutant was killed or survived. AI can explain a gap or propose a test, but it cannot override execution results.
+Mutation testing introduces intentional faults and checks whether the
+tests detect them.
 
-For a rigorous experiment, future versions should evaluate AI-generated tests on a hold-out mutant set that was not used during generation.
+## Key Outcome
 
-## Limitations
+**66.67% → 100% mutation score**
 
-- This is an experimental portfolio project, not a production mutation-testing platform.
-- The initial mutation operators are intentionally small and interpretable.
-- Some surviving mutants can be behaviorally equivalent to the original implementation and require review.
-- LLM output can be incorrect; recommendations require validation.
+**4 → 0 surviving mutations**
 
-## Roadmap
+QA-MUTANT demonstrates an adversarial QA workflow:
 
-- [x] Deterministic mutation engine
-- [x] Mutation execution and scoring
-- [x] Surviving-mutant analysis
-- [x] Streamlit dashboard
-- [x] CI workflow
-- [ ] Hold-out evaluation for AI-generated tests
-- [ ] More language-aware mutation operators
-- [ ] Historical experiment comparison
-- [ ] Automated test patch validation
+**Introduce defects → Detect weak tests → Analyze gaps → Strengthen
+tests → Re-measure quality**
 
-## License
+## Technologies
 
-MIT
+-   Python
+-   pytest
+-   Mutation Testing
+-   JSON
+-   Git / GitHub
+-   OpenAI Responses API
+-   AI-assisted testing
+
+## Author
+
+**Manal Alotaibi**
+
+QA / Software Testing
+
+Focus areas: Quality Assurance, Software Testing, API Testing, Test
+Automation, AI-Assisted Testing, Adversarial Testing.
